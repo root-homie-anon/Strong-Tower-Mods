@@ -53,7 +53,7 @@ The companion is built first. It proves the full technical stack, serves as the 
 - Claude API integration with game state context injection
 - Pre-war character personality and lore backfill
 - Existing companion framework game state hooks (location, quest stage, weather, time, combat, affinity)
-- Player memory system — persistent across sessions via MemPalace local palace architecture (wings, rooms, halls). Memory lives on user's machine alongside save files — no cloud sync, user's responsibility to back up. MCM includes one-click memory backup option.
+- Player memory system — persistent across sessions via MemPalace local palace architecture (wings, rooms, drawers). Memory lives on user's machine alongside save files — no cloud sync, user's responsibility to back up. MCM includes one-click memory backup option.
 - Facial expression morphs via F4SE driven by sentiment analysis
 - MCM for companion behavior toggles
 - Subscription billing via Stripe (Basic $9.99, Premium $24.99, Custom $19.99 base + $0.35/min metered)
@@ -242,7 +242,7 @@ Every mod request flows through this sequence before any build work begins:
 |-----------|--------|-------|
 | F4SE communication pipeline | Mantella (open source) | Blueprint for game↔app communication |
 | LIP file generation | FaceFXWrapper (Nukem9, open source) | Real-time LIP generation from audio |
-| Companion memory system | MemPalace (MIT, milla-jovovich/mempalace) | Local palace architecture for persistent companion memory — wings, rooms, halls, semantic search, 96.6% recall, zero API calls |
+| Companion memory system | MemPalace (MIT, milla-jovovich/mempalace) | Local palace architecture for persistent companion memory — wings, rooms, drawers, semantic search, 96.6% recall, zero API calls |
 | Vortex extension API | Nexus-Mods/vortex-api | Extension scaffolding and events |
 | Nexus API client | @nexusmods/nexus-api (npm) | Mod metadata, permissions, download URLs |
 
