@@ -1,0 +1,16 @@
+{
+  "name": "strong-tower-mods",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "packages/shared/api/companion",
+    "packages/shared/auth",
+    "packages/shared/billing",
+    "packages/shared/db"
+  ],
+  "scripts": {
+    "build": "bun run --filter='*' build",
+    "dev:cloud": "bun run --cwd packages/shared/api/companion dev",
+    "typecheck": "bun run --filter='*' typecheck"
+  }
+}

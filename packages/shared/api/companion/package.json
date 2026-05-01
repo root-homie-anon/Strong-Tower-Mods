@@ -1,0 +1,21 @@
+{
+  "name": "@strong-tower/companion-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "node --watch --experimental-specifier-resolution=node dist/server.js",
+    "build": "tsc --build",
+    "typecheck": "tsc --noEmit",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "@fastify/websocket": "^11.0.2",
+    "fastify": "^5.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.3",
+    "typescript": "^5.8.3"
+  }
+}
