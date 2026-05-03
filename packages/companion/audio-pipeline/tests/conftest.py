@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 import time
@@ -32,7 +33,11 @@ def _wait_for_port(url: str, timeout: float = 10.0) -> None:
 def cloud_process() -> Generator[subprocess.Popen[bytes], None, None]:
     proc = subprocess.Popen(
         ['node', str(CLOUD_DIST)],
-        env={**__import__('os').environ, 'CLOUD_PORT': str(CLOUD_PORT)},
+        env={
+            **os.environ,
+            'CLOUD_PORT': str(CLOUD_PORT),
+            'ANTHROPIC_MOCK': 'true',
+        },
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
@@ -51,7 +56,55 @@ def sidecar_process(cloud_process: subprocess.Popen[bytes]) -> Generator[subproc
         [python, '-m', 'audio_pipeline.main'],
         cwd=str(SIDECAR_PKG),
         env={
-            **__import__('os').environ,
+            **os.environ,
+            'SIDECAR_PORT': str(SIDECAR_PORT),
+            'CLOUD_WS_URL': f'ws://127.0.0.1:{CLOUD_PORT}/companion/turn',
+            'PYTHONPATH': str(SIDECAR_PKG / 'src'),
+        },
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    try:
+        _wait_for_port(f'http://127.0.0.1:{SIDECAR_PORT}/health')
+        yield proc
+    finally:
+        proc.terminate()
+        proc.wait(timeout=5)
+
+
+@pytest.fixture(scope='session')
+def cloud_process_live() -> Generator[subprocess.Popen[bytes], None, None]:
+    """Cloud process fixture for smoke tests — uses real ANTHROPIC_API_KEY, no mock."""
+    proc = subprocess.Popen(
+        ['node', str(CLOUD_DIST)],
+        env={
+            **os.environ,
+            'CLOUD_PORT': str(CLOUD_PORT),
+            # ANTHROPIC_MOCK is intentionally absent so the real SDK is used.
+            # ANTHROPIC_API_KEY must be set in the test runner's environment.
+        },
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    try:
+        _wait_for_port(f'http://127.0.0.1:{CLOUD_PORT}/health')
+        yield proc
+    finally:
+        proc.terminate()
+        proc.wait(timeout=5)
+
+
+@pytest.fixture(scope='session')
+def sidecar_process_live(
+    cloud_process_live: subprocess.Popen[bytes],
+) -> Generator[subprocess.Popen[bytes], None, None]:
+    """Sidecar process fixture for smoke tests — paired with cloud_process_live."""
+    python = sys.executable
+    proc = subprocess.Popen(
+        [python, '-m', 'audio_pipeline.main'],
+        cwd=str(SIDECAR_PKG),
+        env={
+            **os.environ,
             'SIDECAR_PORT': str(SIDECAR_PORT),
             'CLOUD_WS_URL': f'ws://127.0.0.1:{CLOUD_PORT}/companion/turn',
             'PYTHONPATH': str(SIDECAR_PKG / 'src'),
