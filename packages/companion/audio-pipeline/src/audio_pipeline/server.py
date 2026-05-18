@@ -7,6 +7,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
+from . import memory
 from .cloud_client import request_turn
 from .errors import AudioPipelineError
 from .voice import synthesize_for_turn
@@ -20,7 +21,14 @@ class TurnRequest(BaseModel):
     sessionId: str = Field(min_length=1)
     seq: int = Field(ge=1)
     trigger: str = Field(min_length=1)
+    # Player-typed or transcribed dialogue. None when the trigger does not
+    # carry player input (ambient one-liners, scripted prompts). Validated
+    # by the cloud schema with the same nullability rule.
+    playerInput: str | None = None
     gameState: dict[str, Any] = Field(default_factory=dict)
+    # Client-supplied memory entries (the F4SE plugin may inject in-game
+    # context here). The sidecar adds MemPalace recall on top before
+    # forwarding to the cloud.
     memoryRecall: list[Any] = Field(default_factory=list)
     history: list[Any] = Field(default_factory=list)
 
@@ -40,13 +48,24 @@ async def health() -> dict[str, str]:
 
 @app.post('/turn/request')
 async def turn_request(body: TurnRequest) -> dict[str, Any]:
+    # Augment the client-supplied memoryRecall with MemPalace search results.
+    # The query is the trigger + player input — the same string the cloud
+    # will see in <trigger> and <player_input>, so recall surfaces memories
+    # relevant to what Sarah is actually about to respond to. Failures here
+    # are swallowed inside memory.recall() — the turn proceeds with whatever
+    # memoryRecall the client provided.
+    query = body.trigger if not body.playerInput else f'{body.trigger} {body.playerInput}'
+    palace_recall = await memory.recall(session_id=body.sessionId, query=query)
+    augmented_recall = list(body.memoryRecall) + palace_recall.items
+
     try:
         cloud_response = await request_turn(
             session_id=body.sessionId,
             seq=body.seq,
             trigger=body.trigger,
+            player_input=body.playerInput,
             game_state=body.gameState,
-            memory_recall=body.memoryRecall,
+            memory_recall=augmented_recall,
             history=body.history,
         )
     except AudioPipelineError:
@@ -61,6 +80,18 @@ async def turn_request(body: TurnRequest) -> dict[str, Any]:
         text=cloud_response['responseText'],
         session_id=cloud_response['sessionId'],
         seq=cloud_response['seq'],
+    )
+
+    # Persist the completed turn to the player's palace conversation log.
+    # The store happens AFTER synthesis succeeds so a failed turn is not
+    # remembered as if it had happened. mempalace's miner ingests these
+    # logs between sessions.
+    await memory.store_turn(
+        session_id=body.sessionId,
+        player_input=body.playerInput,
+        response_text=cloud_response['responseText'],
+        sentiment=cloud_response['sentiment'],
+        game_state=body.gameState,
     )
 
     return {

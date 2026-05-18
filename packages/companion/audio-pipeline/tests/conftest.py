@@ -74,6 +74,10 @@ def sidecar_process(cloud_process: subprocess.Popen[bytes]) -> Generator[subproc
             'PYTHONPATH': str(SIDECAR_PKG / 'src'),
             'ELEVENLABS_MOCK': 'true',
             'AUDIO_OUTPUT_DIR': str(TEST_AUDIO_DIR),
+            # Memory pipeline stays mocked for the existing round-trip
+            # tests so they don't materialise a palace per test run.
+            # Focused memory tests in test_memory.py exercise the real path.
+            'MEMORY_MOCK': 'true',
         },
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -124,6 +128,10 @@ def sidecar_process_live(
             'PYTHONPATH': str(SIDECAR_PKG / 'src'),
             'ELEVENLABS_MOCK': 'true',
             'AUDIO_OUTPUT_DIR': str(TEST_AUDIO_DIR),
+            # Memory pipeline stays mocked for the existing round-trip
+            # tests so they don't materialise a palace per test run.
+            # Focused memory tests in test_memory.py exercise the real path.
+            'MEMORY_MOCK': 'true',
         },
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,

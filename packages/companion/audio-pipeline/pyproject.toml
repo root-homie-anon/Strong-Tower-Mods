@@ -7,6 +7,7 @@ dependencies = [
     "uvicorn[standard]==0.34.2",
     "websockets==14.2",
     "httpx==0.28.1",
+    "mempalace",
 ]
 
 [build-system]
@@ -20,6 +21,9 @@ packages = ["src/audio_pipeline"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "session"
 testpaths = ["tests"]
+
+[tool.uv.sources]
+mempalace = { git = "https://github.com/milla-jovovich/mempalace.git" }
 
 [dependency-groups]
 dev = [

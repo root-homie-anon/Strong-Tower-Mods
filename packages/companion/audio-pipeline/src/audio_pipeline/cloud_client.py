@@ -115,13 +115,14 @@ async def request_turn(
     game_state: dict[str, Any],
     memory_recall: list[Any],
     history: list[Any],
+    player_input: str | None = None,
 ) -> dict[str, Any]:
     frame = {
         'type': 'turn.request',
         'seq': seq,
         'sessionId': session_id,
         'trigger': trigger,
-        'playerInput': None,
+        'playerInput': player_input,
         'characterContext': None,
         'gameState': game_state,
         'memoryRecall': memory_recall,
