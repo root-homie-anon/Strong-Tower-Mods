@@ -38,7 +38,10 @@ Thumbs.db
 *.swo
 
 # PyInstaller
-*.spec
+# Note: we intentionally DO commit packaging/sidecar.spec — it contains
+# the hand-curated hiddenimports list. Only ignore PyInstaller's build
+# scratch space and the frozen-binary output dir.
+build-frozen/
 dist-frozen/
 
 # Prisma SQLite dev DB
