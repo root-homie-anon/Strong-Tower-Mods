@@ -32,7 +32,17 @@ def _lockfile_path() -> pathlib.Path:
 
 
 def _pid_is_alive(pid: int) -> bool:
-    """Return True if a process with the given PID is running on this machine."""
+    """Return True if a process with the given PID is running on this machine.
+
+    Cross-platform: on POSIX, ``os.kill(pid, 0)`` raises ``ProcessLookupError``
+    for absent processes and ``PermissionError`` for processes we cannot
+    signal. On Windows, the same call raises ``OSError`` with
+    ``winerror == 87`` ("invalid parameter") for stale PIDs — a stale
+    lockfile must not block sidecar startup, so that case is treated as
+    not alive.
+    """
+    if pid <= 0:
+        return False
     try:
         os.kill(pid, 0)
         return True
@@ -41,6 +51,10 @@ def _pid_is_alive(pid: int) -> bool:
     except PermissionError:
         # kill(pid, 0) raises PermissionError when the process exists but we cannot signal it.
         return True
+    except OSError as exc:
+        if getattr(exc, 'winerror', None) == 87:
+            return False
+        raise
 
 
 def _acquire_lockfile() -> pathlib.Path:

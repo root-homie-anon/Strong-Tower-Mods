@@ -4,6 +4,7 @@ import fastifyWebsocket from '@fastify/websocket';
 import fastifyRateLimit from '@fastify/rate-limit';
 import { registerHealth } from './health.js';
 import { registerTurn } from './turn.js';
+import { registerSessions } from './sessions.js';
 import { CompanionApiError } from './errors.js';
 
 const PORT = parseInt(process.env['CLOUD_PORT'] ?? '8080', 10);
@@ -37,6 +38,7 @@ async function buildApp() {
   });
 
   registerHealth(app);
+  registerSessions(app);
   registerTurn(app);
 
   return app;

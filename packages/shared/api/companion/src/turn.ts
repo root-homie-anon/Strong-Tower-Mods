@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import Anthropic from '@anthropic-ai/sdk';
 import { Ajv } from 'ajv';
 import type { FastifyInstance } from 'fastify';
+import { repositories } from '@strong-tower/db';
 import { anthropic, MODEL } from './claude.js';
 import {
   UpstreamAuthError,
@@ -11,6 +12,7 @@ import {
   UpstreamFailedError,
   UpstreamUnreachableError,
 } from './errors.js';
+import { verifyTurnAuth, type AuthContext } from './auth.js';
 
 // Maximum turns allowed per WS connection. Configurable via env for testing.
 const MAX_TURNS_PER_CONNECTION = parseInt(
@@ -260,12 +262,19 @@ export function registerTurn(app: FastifyInstance): void {
   app.get(
     '/companion/turn',
     { websocket: true },
-    (socket, req) => {
+    async (socket, req) => {
       const token = extractBearer(req.headers['authorization']);
-      if (!token) {
-        socket.send(
-          JSON.stringify({ error: 'AUTH_ERROR', message: 'Missing or malformed Authorization header' })
-        );
+      // Verify the bearer up-front. In mock mode any non-empty token
+      // is accepted (legacy contract preserved for the audio-pipeline
+      // tests). In real mode the JWT must verify and its ApiSession
+      // must still be open.
+      let authCtx: AuthContext;
+      try {
+        authCtx = await verifyTurnAuth(token);
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : 'Auth verification failed';
+        socket.send(JSON.stringify({ error: 'AUTH_ERROR', message }));
         socket.close(1008, 'Unauthorized');
         return;
       }
@@ -348,6 +357,44 @@ export function registerTurn(app: FastifyInstance): void {
 
         const { sentiment, responseText } = parseSentimentTag(rawText);
         const morphHints = MORPH_HINTS[sentiment];
+        const billingMetric = computeBillingMetric(claudeResponse.usage);
+
+        // Record the metered usage on the ApiSession before the
+        // response goes out. The DB write fires first so a transient
+        // sidecar disconnect after we send cannot drop the billing
+        // event. In mock mode there is no ApiSession row to attribute
+        // to, so we skip — those turns are never billed by design.
+        if (!authCtx.mock) {
+          try {
+            const session = await repositories.sessions.findByJti(authCtx.jti);
+            if (session) {
+              await repositories.usage.record({
+                apiSessionId: session.id,
+                userId: authCtx.userId,
+                metric: 'claude_turn',
+                quantity: 1,
+                costMicrodollars: billingMetric,
+              });
+            } else {
+              // Session vanished mid-flight (admin close, DB cleanup, …).
+              // Surface as a soft error so the client can decide whether to
+              // retry; do not throw, because that would close the WS for
+              // unrelated callers.
+              app.log.warn(
+                { jti: authCtx.jti },
+                'Skipping MeteredUsage write — ApiSession no longer exists'
+              );
+            }
+          } catch (recordErr) {
+            // A usage-recording failure must not break the turn for the
+            // user — we log loudly and continue. The denormalized total
+            // on ApiSession will reflect only what we successfully wrote.
+            app.log.error(
+              { err: recordErr, jti: authCtx.jti },
+              'Failed to record MeteredUsage row'
+            );
+          }
+        }
 
         const response: TurnResponseFrame = {
           type: 'turn.response',
@@ -357,7 +404,7 @@ export function registerTurn(app: FastifyInstance): void {
           sentiment,
           morphHints,
           audioB64: '',
-          billingMetric: computeBillingMetric(claudeResponse.usage),
+          billingMetric,
           source: 'cloud-claude',
         };
 

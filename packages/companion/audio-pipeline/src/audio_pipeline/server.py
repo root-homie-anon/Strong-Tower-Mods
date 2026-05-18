@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 
 from .cloud_client import request_turn
 from .errors import AudioPipelineError
+from .voice import synthesize_for_turn
 
 SIDECAR_PORT = int(os.environ.get('SIDECAR_PORT', '4999'))
 
@@ -53,16 +54,24 @@ async def turn_request(body: TurnRequest) -> dict[str, Any]:
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
-    # Transform cloud turn.response hints into the sidecar dispatch shape returned to the F4SE caller.
-    # Step 4 (ElevenLabs + FaceFXWrapper) replaces the placeholder audioPath/lipPath/morphSeq here.
+    # Synthesise the spoken audio for this turn. Phase A: WAV output via ElevenLabs
+    # (or a deterministic 1.0 s silent WAV under ELEVENLABS_MOCK=true). FUZ/XWM
+    # packaging and the real LIP file land in Phase B alongside FaceFXWrapper.
+    artifact = await synthesize_for_turn(
+        text=cloud_response['responseText'],
+        session_id=cloud_response['sessionId'],
+        seq=cloud_response['seq'],
+    )
+
     return {
         'seq': cloud_response['seq'],
         'sessionId': cloud_response['sessionId'],
         'responseText': cloud_response['responseText'],
         'sentiment': cloud_response['sentiment'],
         'morphSeq': cloud_response.get('morphHints', []),
-        'audioPath': '',
+        'audioPath': str(artifact.audio_path),
+        'audioFormat': artifact.format,
         'lipPath': '',
-        'durationMs': 0,
+        'durationMs': artifact.duration_ms,
         'source': cloud_response['source'],
     }

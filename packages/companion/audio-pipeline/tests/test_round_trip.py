@@ -61,12 +61,24 @@ def test_round_trip_contract(sidecar_process: subprocess.Popen[bytes]) -> None:
     assert body['source'] == 'cloud-claude', f'Expected source=cloud-claude, got: {body.get("source")}'
     assert body['sessionId'] == 'dev-session-001'
     assert body['seq'] == 1
-    assert isinstance(body['audioPath'], str)
-    assert isinstance(body['lipPath'], str)
+    assert isinstance(body['audioPath'], str) and body['audioPath']
+    assert body['audioFormat'] == 'wav'
+    assert isinstance(body['lipPath'], str)  # Phase B will populate this.
     assert isinstance(body['morphSeq'], list)
-    assert body['durationMs'] == 0
+    # Phase A mock voice pipeline emits exactly 1.0 s of silence.
+    assert body['durationMs'] == 1000
     assert isinstance(body['responseText'], str) and len(body['responseText']) > 0
     assert body['sentiment'] in VALID_SENTIMENTS, f'Invalid sentiment: {body.get("sentiment")}'
+
+    # The WAV file the sidecar wrote should actually exist on disk and
+    # be a non-empty RIFF/WAVE container. This catches regressions where
+    # the response advertises a path the F4SE plugin would fail to open.
+    audio_file = Path(body['audioPath'])
+    assert audio_file.is_file(), f'audioPath does not exist on disk: {audio_file}'
+    header = audio_file.read_bytes()[:12]
+    assert header[:4] == b'RIFF' and header[8:12] == b'WAVE', (
+        f'audioPath is not a valid RIFF/WAVE file: header={header!r}'
+    )
 
 
 def test_missing_auth_on_cloud_direct_ws(cloud_process: subprocess.Popen[bytes]) -> None:
@@ -217,6 +229,7 @@ def turn_limit_cloud_process() -> Generator[subprocess.Popen[bytes], None, None]
             **os.environ,
             'CLOUD_PORT': str(_TURN_LIMIT_CLOUD_PORT),
             'ANTHROPIC_MOCK': 'true',
+            'AUTH_MOCK': 'true',
             'MAX_TURNS_PER_CONNECTION': str(_TURN_LIMIT_MAX),
         },
         stdout=subprocess.PIPE,

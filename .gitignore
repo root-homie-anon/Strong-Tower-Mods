@@ -40,3 +40,13 @@ Thumbs.db
 # PyInstaller
 *.spec
 dist-frozen/
+
+# Prisma SQLite dev DB
+*.db
+*.db-journal
+packages/shared/db/prisma/dev.db*
+packages/shared/db/prisma/migrations/dev/
+
+# Prisma generated client (regenerated on install)
+packages/shared/db/node_modules/.prisma/
+packages/shared/db/prisma-client/

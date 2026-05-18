@@ -1,0 +1,171 @@
+// Strong Tower Mods — shared persistence schema.
+//
+// SQLite for development (zero-setup, runs on the contributor's machine).
+// Production swaps to Postgres by changing the DATABASE_URL and the
+// `provider` line below; the schema is portable as long as we avoid
+// Postgres-only types (no JSONB, no enum types, no UUID extension).
+//
+// We use string columns for enums and ISO-8601 timestamps for everything
+// time-related so the dev/prod boundary stays a one-line change.
+
+generator client {
+  // Generated client lives at the package root in prisma-client/ so
+  // the same relative import path (`../prisma-client/index.js` from
+  // src/, `../prisma-client/index.js` from dist/) resolves at both
+  // compile time and runtime. Generating into src/ would mean
+  // tsc-compiled dist/ has no generated client; generating into
+  // node_modules/.prisma would lose hoisting compatibility in a
+  // workspace. The package-root location avoids both pitfalls.
+  provider      = "prisma-client-js"
+  output        = "../prisma-client"
+  binaryTargets = ["native"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Identity
+// ---------------------------------------------------------------------------
+
+// One row per human. Created on first Nexus SSO confirmation. We never
+// store a password — Nexus is the sole identity provider.
+model User {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Cached display fields from Nexus at login time. Re-synced on every
+  // confirmed SSO round-trip so a Nexus username/avatar change shows up
+  // for the user on their next visit.
+  displayName String?
+  avatarUrl   String?
+
+  // Nexus premium status influences Nexus API rate limits (600 vs 300
+  // req/day). Cached here to avoid an extra Nexus round-trip per session.
+  nexusIsPremium Boolean @default(false)
+
+  nexusIdentity   NexusIdentity?
+  stripeCustomer  StripeCustomer?
+  subscriptions   Subscription[]
+  apiSessions     ApiSession[]
+  meteredUsage    MeteredUsage[]
+
+  @@map("users")
+}
+
+// Strict 1:1 with User. Split into its own table so the Nexus user id is
+// indexed independently and so adding a second identity provider later
+// is purely additive.
+model NexusIdentity {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  nexusUserId  Int      @unique
+  nexusUsername String
+  linkedAt     DateTime @default(now())
+
+  @@map("nexus_identities")
+  @@index([nexusUserId])
+}
+
+// ---------------------------------------------------------------------------
+// Billing
+// ---------------------------------------------------------------------------
+
+// Created automatically on first login. The Stripe customer id is the
+// stable anchor for everything billing-related; we never look up by
+// email because users can change their Nexus email and we never want
+// duplicate Stripe customers.
+model StripeCustomer {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stripeCustomerId String   @unique
+  defaultPaymentMethodId String?
+  // Custom-tier per-month spend ceiling in microdollars. The Custom tier
+  // requires this be set before any session can open. Other tiers ignore it.
+  spendCeilingMicrodollars Int?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("stripe_customers")
+  @@index([stripeCustomerId])
+}
+
+// One row per active or historical subscription. Tier values are kept
+// as plain strings rather than a Prisma enum so adding a tier does not
+// require a schema migration and so the schema stays Postgres/SQLite
+// portable. Validated at the application layer against the BillingTier
+// type in shared/billing.
+model Subscription {
+  id                   String   @id @default(cuid())
+  userId               String
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stripeSubscriptionId String   @unique
+  tier                 String   // "basic" | "premium" | "custom" | "creator" | "bundle_basic_creator" | ...
+  status               String   // "active" | "trialing" | "past_due" | "canceled" | "incomplete"
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@map("subscriptions")
+  @@index([userId, status])
+  @@index([stripeSubscriptionId])
+}
+
+// ---------------------------------------------------------------------------
+// Runtime sessions
+// ---------------------------------------------------------------------------
+
+// One row per JWT-authenticated companion session. Tracks lifecycle so
+// the Custom-tier pre-authorization can be released or captured on close.
+// Persisted (not in-memory) so a cloud restart does not strand
+// pre-authorized charges or lose ongoing session attribution.
+model ApiSession {
+  id                       String   @id @default(cuid())
+  userId                   String
+  user                     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jwtJti                   String   @unique
+  tier                     String
+  openedAt                 DateTime @default(now())
+  closedAt                 DateTime?
+  // Set for Custom-tier sessions; null for fixed-price tiers.
+  stripePreAuthIntentId    String?
+  preAuthAmountMicrodollars Int?
+  // Total metered cost incurred during the session, denormalized from
+  // MeteredUsage rows for fast lookups on the session-close pre-auth
+  // capture path.
+  meteredTotalMicrodollars Int      @default(0)
+
+  meteredUsage             MeteredUsage[]
+
+  @@map("api_sessions")
+  @@index([userId, openedAt])
+}
+
+// One row per billable unit (turn, minute, etc.) emitted by the cloud
+// companion API. The `metric` column distinguishes units so a single
+// session can mix turn-priced and time-priced events as the product
+// evolves. `costMicrodollars` is the authoritative cost figure — the
+// cloud computes it from Anthropic usage in shared/api/companion and
+// passes it through verbatim so reporting is consistent end-to-end.
+model MeteredUsage {
+  id               String   @id @default(cuid())
+  apiSessionId     String
+  apiSession       ApiSession @relation(fields: [apiSessionId], references: [id], onDelete: Cascade)
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  metric           String   // "claude_turn" | "elevenlabs_seconds" | ...
+  quantity         Int
+  costMicrodollars Int
+  occurredAt       DateTime @default(now())
+
+  @@map("metered_usage")
+  @@index([userId, occurredAt])
+  @@index([apiSessionId])
+}

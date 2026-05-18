@@ -8,9 +8,14 @@
     "packages/shared/billing",
     "packages/shared/db"
   ],
+  "//note": "If you add a new package, add it here AND ensure its build script runs in topological order. shared/db must build before anything that imports from it.",
   "scripts": {
     "build": "bun run --filter='*' build",
     "dev:cloud": "bun run --cwd packages/shared/api/companion dev",
-    "typecheck": "bun run --filter='*' typecheck"
+    "typecheck": "bun run --filter='*' typecheck",
+    "db:migrate": "bun run --cwd packages/shared/db db:migrate",
+    "db:reset": "bun run --cwd packages/shared/db db:reset",
+    "db:studio": "bun run --cwd packages/shared/db db:studio",
+    "test:db": "bun run --cwd packages/shared/db test"
   }
 }
