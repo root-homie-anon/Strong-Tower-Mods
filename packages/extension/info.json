@@ -1,0 +1,9 @@
+{
+  "name": "Strong Tower Mods",
+  "id": "strong-tower-mods-vortex",
+  "version": "0.1.0",
+  "author": "root-homie-anon",
+  "description": "AI-curated load order, plain-English conflict detection, and Strong Tower Mods cloud integration for Fallout 4.",
+  "supportedGames": ["fallout4"],
+  "minVortexVersion": "1.4.0"
+}

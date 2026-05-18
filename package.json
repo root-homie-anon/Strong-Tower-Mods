@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "workspaces": [
+    "packages/extension",
     "packages/shared/api/companion",
     "packages/shared/auth",
     "packages/shared/billing",
