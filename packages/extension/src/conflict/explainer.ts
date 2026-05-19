@@ -142,6 +142,19 @@ function mockText(
         `will appear to do nothing in-game. Usually this means the mod author forgot to repack the plugin ` +
         `after editing.`
       );
+    case 'master-mismatch':
+      return (
+        `${subjectName}'s declared masters disagree with what its plugin file actually requires. ` +
+        `Differences: ${finding.resource}. Either the Vortex metadata is stale or the plugin was modified ` +
+        `outside Vortex; either way the load order Vortex computes from metadata may not match what the ` +
+        `game actually needs.`
+      );
+    case 'record-type-overlap':
+      return (
+        `${finding.modIds.length} mods all contain ${finding.resource} records: ${finding.modIds.join(', ')}. ` +
+        `That doesn't mean they actually conflict, but whichever loads last will override the others' edits ` +
+        `to that record type. Pay attention to load-order placement.`
+      );
     default: {
       // Exhaustiveness check — adding a new ConflictKind without
       // updating mockText causes a TypeScript error here.
@@ -161,6 +174,10 @@ function mockSuggestedAction(finding: ConflictFinding): string {
       return `Re-run "Sort load order" from the Vortex toolbar, or move the dependent mod manually to after its master.`;
     case 'plugin-without-master':
       return `Open the mod's page on Nexus and check if a repack is available. If not, the plugin may simply be inert.`;
+    case 'master-mismatch':
+      return `Reinstall the mod through Vortex (so metadata refreshes), or open the plugin in xEdit to verify the actual master list.`;
+    case 'record-type-overlap':
+      return `Check whether one of the mods is intended to be a patch for the other; if so, place the patch later in the load order.`;
     default: {
       const _exhaustive: never = finding.kind;
       return `No suggested action: ${String(_exhaustive)}`;

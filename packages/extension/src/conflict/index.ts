@@ -22,6 +22,11 @@ export {
   type ExplainerOptions,
   type CloudExplainerConfig,
 } from './explainer.js';
+export {
+  parseEspHeader,
+  EspParseError,
+  type EspHeader,
+} from './esp-parser.js';
 export type {
   ConflictFinding,
   ConflictKind,

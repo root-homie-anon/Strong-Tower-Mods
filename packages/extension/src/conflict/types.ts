@@ -12,7 +12,9 @@ export type ConflictKind =
   | 'missing-master'
   | 'duplicate-plugin'
   | 'out-of-order-master'
-  | 'plugin-without-master';
+  | 'plugin-without-master'
+  | 'master-mismatch'
+  | 'record-type-overlap';
 
 export type ConflictSeverity = 'warning' | 'error' | 'blocker';
 

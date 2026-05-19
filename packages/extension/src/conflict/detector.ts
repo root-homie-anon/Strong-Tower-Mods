@@ -28,6 +28,21 @@
 
 import type { ModSummary } from '../load-order/ranker.js';
 import type { ConflictFinding, ConflictReport } from './types.js';
+import type { EspHeader } from './esp-parser.js';
+
+/**
+ * Optional per-mod parsed ESP data, keyed by ``modId``. When the
+ * Vortex extension is able to read and parse plugin bytes ahead of
+ * calling ``detectConflicts``, it passes them in here and the
+ * detector runs two additional passes:
+ *
+ *   - master-mismatch (the parsed MAST list disagrees with the
+ *     metadata-supplied masters)
+ *   - record-type-overlap (two mods touch the same top-level group)
+ *
+ * Omitting the map preserves the legacy metadata-only behaviour.
+ */
+export type EspDataByMod = ReadonlyMap<string, EspHeader>;
 
 /**
  * Run the conflict detector over a (possibly already-ranked) mod
@@ -38,7 +53,8 @@ import type { ConflictFinding, ConflictReport } from './types.js';
  */
 export function detectConflicts(
   mods: ModSummary[],
-  rankedOrder?: string[]
+  rankedOrder?: string[],
+  espData?: EspDataByMod
 ): ConflictReport {
   const findings: ConflictFinding[] = [];
   const notes: string[] = [];
@@ -157,6 +173,63 @@ export function detectConflicts(
         shortDescription: `plugin-without-master:${mod.modId}`,
       });
     }
+  }
+
+  // ---- 5. ESP-derived passes (only run when espData is supplied) ----
+  if (espData) {
+    // 5a. Master mismatch: declared metadata masters disagree with
+    //     what the ESP's TES4 record actually lists. Either side
+    //     could be stale; we flag the discrepancy and let the user
+    //     decide which to trust.
+    for (const mod of mods) {
+      const parsed = espData.get(mod.modId);
+      if (!parsed) continue;
+      const declared = new Set((mod.masters ?? []).map((m) => m.toLowerCase()));
+      const actual = new Set(parsed.masters.map((m) => m.toLowerCase()));
+      const onlyDeclared = [...declared].filter((m) => !actual.has(m));
+      const onlyActual = [...actual].filter((m) => !declared.has(m));
+      if (onlyDeclared.length > 0 || onlyActual.length > 0) {
+        findings.push({
+          kind: 'master-mismatch',
+          severity: 'warning',
+          modIds: [mod.modId],
+          resource: [...onlyDeclared, ...onlyActual].join(','),
+          shortDescription: `master-mismatch:${mod.modId}`,
+        });
+      }
+    }
+
+    // 5b. Record-type overlap: build a reverse index from record type
+    //     to the mods that touch it, emit one finding per type that
+    //     has more than one mod. Quadratic-safe: each mod's record
+    //     types are deduped first, so the index size is bounded by
+    //     the count of distinct top-level group codes (a couple of
+    //     hundred at most).
+    const modsByRecordType = new Map<string, string[]>();
+    for (const mod of mods) {
+      const parsed = espData.get(mod.modId);
+      if (!parsed) continue;
+      const seen = new Set<string>();
+      for (const groupType of parsed.topLevelGroups) {
+        if (seen.has(groupType)) continue;
+        seen.add(groupType);
+        const list = modsByRecordType.get(groupType) ?? [];
+        list.push(mod.modId);
+        modsByRecordType.set(groupType, list);
+      }
+    }
+    for (const [recordType, modIds] of modsByRecordType) {
+      if (modIds.length < 2) continue;
+      findings.push({
+        kind: 'record-type-overlap',
+        severity: 'warning',
+        modIds: [...modIds],
+        resource: recordType,
+        shortDescription: `record-type-overlap:${recordType}`,
+      });
+    }
+  } else {
+    notes.push('Skipped ESP-derived passes: no espData supplied.');
   }
 
   return { findings, notes };
