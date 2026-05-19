@@ -14,4 +14,6 @@ export type {
   ModSummary,
   RankedMod,
   RankingResult,
+  RankerOptions,
+  CloudRankerConfig,
 } from './ranker.js';

@@ -16,7 +16,12 @@
  */
 
 export { detectConflicts } from './detector.js';
-export { explainConflict, isMockMode } from './explainer.js';
+export {
+  explainConflict,
+  isMockMode,
+  type ExplainerOptions,
+  type CloudExplainerConfig,
+} from './explainer.js';
 export type {
   ConflictFinding,
   ConflictKind,

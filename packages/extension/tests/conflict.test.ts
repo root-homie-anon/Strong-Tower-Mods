@@ -141,7 +141,7 @@ describe('detectConflicts — plugin without master', () => {
 });
 
 describe('explainConflict (mock-template)', () => {
-  test('produces a non-empty body and suggested action for each kind', () => {
+  test('produces a non-empty body and suggested action for each kind', async () => {
     const mods: ModSummary[] = [
       mod({ modId: 'a', name: 'Mod A', kind: 'content', pluginFiles: ['A.esp'], masters: ['Missing.esm'] }),
       mod({ modId: 'b', name: 'Mod B', kind: 'content', pluginFiles: ['B.esp'] }),
@@ -150,14 +150,14 @@ describe('explainConflict (mock-template)', () => {
     expect(report.findings.length).toBeGreaterThan(0);
 
     for (const finding of report.findings) {
-      const explanation = explainConflict(finding, mods);
+      const explanation = await explainConflict(finding, mods);
       expect(explanation.text.length).toBeGreaterThan(30);
       expect(explanation.suggestedAction.length).toBeGreaterThan(10);
       expect(explanation.source).toBe('mock-template');
     }
   });
 
-  test('mentions the partner mod name on out-of-order-master findings', () => {
+  test('mentions the partner mod name on out-of-order-master findings', async () => {
     const mods: ModSummary[] = [
       mod({ modId: 'addon', name: 'Cool Addon', kind: 'content', pluginFiles: ['A.esp'], masters: ['Framework.esm'] }),
       mod({ modId: 'fwk', name: 'Settlement Framework', kind: 'framework', pluginFiles: ['Framework.esm'] }),
@@ -165,7 +165,7 @@ describe('explainConflict (mock-template)', () => {
     const report = detectConflicts(mods, ['addon', 'fwk']);
     const ooo = report.findings.find((f) => f.kind === 'out-of-order-master');
     expect(ooo).toBeDefined();
-    const explanation = explainConflict(ooo!, mods);
+    const explanation = await explainConflict(ooo!, mods);
     expect(explanation.text).toContain('Cool Addon');
     expect(explanation.text).toContain('Settlement Framework');
   });

@@ -26,6 +26,24 @@
 
 import { NexusApiError } from '../nexus-api/errors.js';
 
+export interface CloudRankerConfig {
+  /** Base URL of the cloud companion API. */
+  baseUrl: string;
+  /** Bearer JWT minted via /session/open. */
+  token: string;
+  /** Fetch impl override; defaults to ``globalThis.fetch``. */
+  fetchImpl?: typeof fetch;
+}
+
+export interface RankerOptions {
+  /**
+   * Cloud config — required when ``RANKER_MOCK`` is unset. Mock mode
+   * ignores this field, so the same call site works in both modes
+   * once a fallback is in place.
+   */
+  cloud?: CloudRankerConfig;
+}
+
 /**
  * Summary of a single mod, in the shape Vortex hands us via
  * ``api.getState().persistent.mods``. The ranker reads only what it
@@ -83,7 +101,10 @@ export function isMockMode(): boolean {
  * input — calling with the same mod list twice in mock mode yields
  * the same ordering and the same rationale strings.
  */
-export async function rankLoadOrder(mods: ModSummary[]): Promise<RankingResult> {
+export async function rankLoadOrder(
+  mods: ModSummary[],
+  options?: RankerOptions
+): Promise<RankingResult> {
   if (mods.length === 0) {
     return { ranked: [], warnings: [], source: isMockMode() ? 'mock-heuristic' : 'cloud-claude' };
   }
@@ -92,16 +113,19 @@ export async function rankLoadOrder(mods: ModSummary[]): Promise<RankingResult> 
     return mockHeuristicRank(mods);
   }
 
-  // Real cloud path — not implemented yet. The Phase 2.3 work ships
-  // only the extension side; the cloud /load-order/rank endpoint
-  // lands together with the conflict detector (Phase 2.4) so they
-  // can share the same Claude prompt-caching prefix.
-  throw new NexusApiError(
-    'LOAD_ORDER_REAL_MODE_NOT_IMPLEMENTED',
-    'The cloud /load-order/rank endpoint is not yet implemented. ' +
-      'Set RANKER_MOCK=true to use the deterministic heuristic for development.',
-    501
-  );
+  // Real cloud path. POST the mod list to /load-order/rank and trust
+  // the response. The cloud has the Anthropic key + the cache-friendly
+  // system prompt; the extension never touches Claude directly.
+  if (!options?.cloud) {
+    throw new NexusApiError(
+      'LOAD_ORDER_CLOUD_CONFIG_MISSING',
+      'Real-mode rankLoadOrder requires options.cloud (baseUrl + token). ' +
+        'Set RANKER_MOCK=true for offline development.',
+      400
+    );
+  }
+
+  return cloudRank(mods, options.cloud);
 }
 
 // ---------------------------------------------------------------------------
@@ -168,6 +192,64 @@ function mockHeuristicRank(mods: ModSummary[]): RankingResult {
   }));
 
   return { ranked, warnings, source: 'mock-heuristic' };
+}
+
+async function cloudRank(
+  mods: ReadonlyArray<ModSummary>,
+  cloud: CloudRankerConfig
+): Promise<RankingResult> {
+  const fetcher = cloud.fetchImpl ?? globalThis.fetch;
+  const url = joinUrl(cloud.baseUrl, '/load-order/rank');
+
+  let response: Response;
+  try {
+    response = await fetcher(url, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${cloud.token}`,
+      },
+      body: JSON.stringify({ mods }),
+    });
+  } catch (err) {
+    throw new NexusApiError(
+      'LOAD_ORDER_CLOUD_UNREACHABLE',
+      `POST ${url} failed before a response: ${(err as Error).message}`,
+      503
+    );
+  }
+
+  if (!response.ok) {
+    const text = await response.text().catch(() => '<no body>');
+    throw new NexusApiError(
+      'LOAD_ORDER_CLOUD_REJECTED',
+      `Cloud /load-order/rank returned ${response.status}: ${text}`,
+      response.status
+    );
+  }
+
+  const raw = (await response.json()) as {
+    ranked?: Array<{ modId: string; rank: number; rationale: string }>;
+    warnings?: string[];
+    source?: string;
+  };
+
+  return {
+    ranked: Array.isArray(raw.ranked) ? raw.ranked : [],
+    warnings: Array.isArray(raw.warnings) ? raw.warnings : [],
+    // The cloud distinguishes 'cloud-claude' (real Claude) from
+    // 'cloud-mock' (ANTHROPIC_MOCK=true on the cloud side). Both
+    // are "the cloud answered", so we normalise to 'cloud-claude'
+    // here — downstream consumers care about source provenance
+    // (cloud vs local), not which mock branch the cloud took.
+    source: 'cloud-claude',
+  };
+}
+
+function joinUrl(base: string, path: string): string {
+  const trimmedBase = base.endsWith('/') ? base.slice(0, -1) : base;
+  const trimmedPath = path.startsWith('/') ? path : `/${path}`;
+  return `${trimmedBase}${trimmedPath}`;
 }
 
 function rationaleFor(kind: NonNullable<ModSummary['kind']>, mod: ModSummary): string {

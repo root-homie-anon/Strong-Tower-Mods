@@ -5,6 +5,8 @@ import fastifyRateLimit from '@fastify/rate-limit';
 import { registerHealth } from './health.js';
 import { registerTurn } from './turn.js';
 import { registerSessions } from './sessions.js';
+import { registerLoadOrder } from './load-order.js';
+import { registerConflict } from './conflict.js';
 import { CompanionApiError } from './errors.js';
 
 const PORT = parseInt(process.env['CLOUD_PORT'] ?? '8080', 10);
@@ -40,6 +42,8 @@ async function buildApp() {
   registerHealth(app);
   registerSessions(app);
   registerTurn(app);
+  registerLoadOrder(app);
+  registerConflict(app);
 
   return app;
 }

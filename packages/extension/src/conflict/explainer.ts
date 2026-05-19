@@ -19,35 +19,93 @@
 import type { ModSummary } from '../load-order/ranker.js';
 import type { ConflictFinding, ConflictExplanation } from './types.js';
 
+export interface CloudExplainerConfig {
+  baseUrl: string;
+  token: string;
+  fetchImpl?: typeof fetch;
+}
+
+export interface ExplainerOptions {
+  /** Cloud config — required to take the real path. Mock mode ignores. */
+  cloud?: CloudExplainerConfig;
+}
+
 export function isMockMode(): boolean {
-  // Currently the default; the real path lands together with the
-  // /conflict/explain cloud endpoint. Until then this returns true
-  // unconditionally — there is no real path to flip to.
+  // Default true so existing callers continue to get the local
+  // template path. Pass options.cloud and set EXPLAINER_MOCK=false to
+  // hit the real /conflict/explain endpoint.
   if (process.env['EXPLAINER_MOCK'] === 'false') return false;
   return true;
 }
 
-export function explainConflict(
+/**
+ * Synchronous + asynchronous overloads — mock-mode callers do not
+ * need to await, real-mode callers do. We always return a Promise
+ * so the runtime shape is consistent; mock-mode resolves
+ * synchronously via ``Promise.resolve`` so a caller that ``await``s
+ * pays nothing extra.
+ */
+export async function explainConflict(
+  finding: ConflictFinding,
+  mods: ReadonlyArray<ModSummary>,
+  options?: ExplainerOptions
+): Promise<ConflictExplanation> {
+  if (isMockMode() || !options?.cloud) {
+    return mockExplain(finding, mods);
+  }
+  return cloudExplain(finding, mods, options.cloud);
+}
+
+function mockExplain(
   finding: ConflictFinding,
   mods: ReadonlyArray<ModSummary>
 ): ConflictExplanation {
-  // ``mods`` is the same list passed to detectConflicts so explainer
-  // and detector see identical state. We look up each involved mod
-  // here rather than asking the caller to pre-join.
   const modById = new Map<string, ModSummary>();
   for (const mod of mods) modById.set(mod.modId, mod);
   const subject = modById.get(finding.modIds[0] ?? '');
   const partner = finding.modIds[1] ? modById.get(finding.modIds[1]) : undefined;
-
-  const text = mockText(finding, subject, partner);
-  const suggestedAction = mockSuggestedAction(finding);
-
   return {
     finding,
-    text,
-    suggestedAction,
-    source: isMockMode() ? 'mock-template' : 'cloud-claude',
+    text: mockText(finding, subject, partner),
+    suggestedAction: mockSuggestedAction(finding),
+    source: 'mock-template',
   };
+}
+
+async function cloudExplain(
+  finding: ConflictFinding,
+  mods: ReadonlyArray<ModSummary>,
+  cloud: CloudExplainerConfig
+): Promise<ConflictExplanation> {
+  const fetcher = cloud.fetchImpl ?? globalThis.fetch;
+  const url = joinUrl(cloud.baseUrl, '/conflict/explain');
+  const response = await fetcher(url, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      authorization: `Bearer ${cloud.token}`,
+    },
+    body: JSON.stringify({ finding, mods }),
+  });
+  if (!response.ok) {
+    // Fall back to the template rather than throwing — the user
+    // clicked "Explain" on a notification; surfacing an error here
+    // would be worse UX than degraded prose.
+    return mockExplain(finding, mods);
+  }
+  const raw = (await response.json()) as { text?: string; suggestedAction?: string };
+  return {
+    finding,
+    text: typeof raw.text === 'string' ? raw.text : '',
+    suggestedAction: typeof raw.suggestedAction === 'string' ? raw.suggestedAction : '',
+    source: 'cloud-claude',
+  };
+}
+
+function joinUrl(base: string, path: string): string {
+  const trimmedBase = base.endsWith('/') ? base.slice(0, -1) : base;
+  const trimmedPath = path.startsWith('/') ? path : `/${path}`;
+  return `${trimmedBase}${trimmedPath}`;
 }
 
 function mockText(

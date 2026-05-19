@@ -42,7 +42,7 @@ describe('sortLoadOrderAction', () => {
 });
 
 describe('detectConflictsAction', () => {
-  test('joins findings with explanations in the same order', () => {
+  test('joins findings with explanations in the same order', async () => {
     const mods: ModSummary[] = [
       {
         modId: 'broken',
@@ -52,11 +52,9 @@ describe('detectConflictsAction', () => {
         masters: ['NotInLoad.esm'],
       },
     ];
-    const { report, explanations } = detectConflictsAction({ mods });
+    const { report, explanations } = await detectConflictsAction({ mods });
     expect(report.findings.length).toBeGreaterThan(0);
     expect(explanations).toHaveLength(report.findings.length);
-    // Per-finding rendering pairs by index — they should describe the
-    // same finding kind.
     for (let i = 0; i < report.findings.length; i++) {
       expect(explanations[i]?.finding.kind).toBe(report.findings[i]!.kind);
     }

@@ -16,11 +16,13 @@ import {
   explainConflict,
   type ConflictExplanation,
   type ConflictReport,
+  type ExplainerOptions,
 } from './conflict/index.js';
 import {
   rankLoadOrder,
   type ModSummary,
   type RankingResult,
+  type RankerOptions,
 } from './load-order/index.js';
 import {
   parseBuffoutCrash,
@@ -40,12 +42,14 @@ import {
 
 export interface SortLoadOrderInput {
   mods: ModSummary[];
+  /** Cloud config when calling the real /load-order/rank endpoint. */
+  cloud?: RankerOptions['cloud'];
 }
 
 export async function sortLoadOrderAction(
   input: SortLoadOrderInput
 ): Promise<RankingResult> {
-  return rankLoadOrder(input.mods);
+  return rankLoadOrder(input.mods, input.cloud ? { cloud: input.cloud } : undefined);
 }
 
 // ---------------------------------------------------------------------------
@@ -56,6 +60,8 @@ export interface DetectConflictsInput {
   mods: ModSummary[];
   /** Current load order modIds; omit to skip the out-of-order pass. */
   rankedOrder?: string[];
+  /** Cloud config when calling the real /conflict/explain endpoint. */
+  cloud?: ExplainerOptions['cloud'];
 }
 
 export interface DetectConflictsResult {
@@ -64,11 +70,17 @@ export interface DetectConflictsResult {
   explanations: ConflictExplanation[];
 }
 
-export function detectConflictsAction(
+export async function detectConflictsAction(
   input: DetectConflictsInput
-): DetectConflictsResult {
+): Promise<DetectConflictsResult> {
   const report = detectConflicts(input.mods, input.rankedOrder);
-  const explanations = report.findings.map((f) => explainConflict(f, input.mods));
+  const options: ExplainerOptions | undefined = input.cloud ? { cloud: input.cloud } : undefined;
+  // Per-finding explanations are independent — fire them in parallel.
+  // Each cloud call is ~300-600 ms; doing them serially would make
+  // a 5-finding report feel sluggish in the Vortex notification list.
+  const explanations = await Promise.all(
+    report.findings.map((f) => explainConflict(f, input.mods, options))
+  );
   return { report, explanations };
 }
 
