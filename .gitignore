@@ -53,3 +53,7 @@ packages/shared/db/prisma/migrations/dev/
 # Prisma generated client (regenerated on install)
 packages/shared/db/node_modules/.prisma/
 packages/shared/db/prisma-client/
+
+# Non-redistributable contributor binaries — see tools/README.md
+tools/*
+!tools/README.md

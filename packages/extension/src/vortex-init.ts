@@ -41,6 +41,7 @@ import {
 } from './orchestration.js';
 import type { ModSummary } from './load-order/index.js';
 import type { SessionStore, StoredSession } from './account/index.js';
+import type { CloudConfig } from './account/index.js';
 
 import { types, util } from 'vortex-api';
 import * as fs from 'fs/promises';
@@ -51,6 +52,28 @@ const CLOUD_BASE_URL_DEFAULT = 'http://127.0.0.1:8080';
 
 /** Vortex stores our per-profile session at this state path. */
 const SESSION_STATE_PATH = ['persistent', EXT_NAMESPACE, 'session'];
+/** Cloud base URL configured by the user via the Settings panel. */
+const CLOUD_URL_STATE_PATH = ['persistent', EXT_NAMESPACE, 'cloudBaseUrl'];
+
+/**
+ * Pull the cloud base URL + bearer token from Vortex state.
+ *
+ * Returns ``undefined`` (rather than throwing) when the user has not
+ * linked an account yet — the orchestration layer then falls back to
+ * its mock heuristic so the user can still get a useful local
+ * ranking before logging in.
+ */
+function readCloudConfig(api: types.IExtensionApi):
+  | { baseUrl: string; token: string }
+  | undefined {
+  const state = api.getState();
+  const baseUrl =
+    (util.getSafe(state, CLOUD_URL_STATE_PATH, CLOUD_BASE_URL_DEFAULT) as string) ??
+    CLOUD_BASE_URL_DEFAULT;
+  const session = util.getSafe(state, SESSION_STATE_PATH, null) as StoredSession | null;
+  if (!session) return undefined;
+  return { baseUrl, token: session.token };
+}
 
 function makeVortexSessionStore(api: types.IExtensionApi): SessionStore {
   return {
@@ -135,10 +158,11 @@ function init(context: types.IExtensionContext): boolean {
     async () => {
       const api = context.api;
       const mods = modsFromVortexState(api);
-      const result = await sortLoadOrderAction({ mods });
+      const cloud = readCloudConfig(api);
+      const result = await sortLoadOrderAction({ mods, ...(cloud ? { cloud } : {}) });
       api.sendNotification({
         type: 'success',
-        message: `AI-sorted ${result.ranked.length} mods`,
+        message: `${result.source === 'cloud-claude' ? 'AI' : 'Heuristic'}-sorted ${result.ranked.length} mods`,
         actions: [{ title: 'Apply', action: () => applyOrder(api, result) }],
       });
     }
@@ -147,7 +171,11 @@ function init(context: types.IExtensionContext): boolean {
   context.registerAction('mod-icons', 110, 'flag', {}, 'Detect Conflicts', async () => {
     const api = context.api;
     const mods = modsFromVortexState(api);
-    const { report, explanations } = detectConflictsAction({ mods });
+    const cloud = readCloudConfig(api);
+    const { report, explanations } = await detectConflictsAction({
+      mods,
+      ...(cloud ? { cloud } : {}),
+    });
     if (report.findings.length === 0) {
       api.sendNotification({ type: 'success', message: 'No conflicts detected.' });
       return;
