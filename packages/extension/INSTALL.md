@@ -8,14 +8,16 @@ file is committed but excluded from the default TypeScript build
 because its `vortex-api` import only resolves once you've actually
 installed Vortex locally.
 
-Every shell command below is **PowerShell**. `cmd.exe` equivalents are
-called out where the syntax differs.
+Shell commands below show **PowerShell** by default with **Git Bash**
+and **cmd.exe** equivalents where the syntax differs. Pick whichever
+you actually use.
 
 ## One-time setup
 
+PowerShell:
+
 ```powershell
-# 1. Install Vortex itself (free)
-#    https://www.nexusmods.com/site/mods/1
+# 1. Install Vortex itself (free): https://www.nexusmods.com/site/mods/1
 
 # 2. Pull in the vortex-api types from GitHub
 Set-Location D:\Strong-Tower-Mods\packages\extension
@@ -34,6 +36,21 @@ bun add --dev github:Nexus-Mods/vortex-api
 bun run build
 ```
 
+Git Bash:
+
+```bash
+# Steps 1, 3, 4 are identical to the PowerShell version above.
+# Only the cd and the bun commands change in shell syntax.
+
+cd /d/Strong-Tower-Mods/packages/extension
+bun add --dev github:Nexus-Mods/vortex-api
+
+# Edit tsconfig.json and src/vortex-init.ts as described in steps 3-4
+# above (any editor works).
+
+bun run build
+```
+
 After the build, `dist/` contains the JS files Vortex will load.
 
 ## Pack and install into Vortex
@@ -47,8 +64,16 @@ The directory must contain (at minimum):
 
 ### Option A — symlink for fast dev iteration (recommended)
 
-Open PowerShell **as Administrator** (symlinks require it on Windows by
-default unless Developer Mode is enabled):
+Windows symlinks require Administrator privileges by default (or
+Developer Mode enabled in Settings → Privacy & security → For
+developers).
+
+**Recommended path: do this one step from an Admin PowerShell or Admin
+cmd window**, regardless of which shell you live in day-to-day. Git
+Bash's `ln -s` doesn't reliably create native Windows symlinks without
+extra `MSYS=winsymlinks:nativestrict` setup.
+
+Admin PowerShell:
 
 ```powershell
 New-Item -ItemType SymbolicLink `
@@ -56,10 +81,17 @@ New-Item -ItemType SymbolicLink `
   -Target "D:\Strong-Tower-Mods\packages\extension"
 ```
 
-If you prefer `cmd.exe`:
+Admin cmd:
 
 ```cmd
 mklink /D "%APPDATA%\Vortex\plugins\strong-tower-mods-vortex" "D:\Strong-Tower-Mods\packages\extension"
+```
+
+From Git Bash, you can shell out to cmd to do the same — still needs
+the Git Bash window itself to be Administrator:
+
+```bash
+cmd //c 'mklink /D "%APPDATA%\Vortex\plugins\strong-tower-mods-vortex" "D:\Strong-Tower-Mods\packages\extension"'
 ```
 
 Then in Vortex: **Extensions** tab → **Reload** (or restart Vortex).
@@ -95,15 +127,17 @@ The four user-visible actions (Sort Load Order, Detect Conflicts,
 Parse Latest Crash, Link Account) eventually call the companion API
 at the URL configured in extension settings.
 
-For local dev, run the cloud in a separate PowerShell window:
+For local dev, run the cloud in a separate shell window. The four env
+vars below are session-only — they vanish when the window closes.
+
+PowerShell:
 
 ```powershell
 Set-Location D:\Strong-Tower-Mods\packages\shared\api\companion
 
-# Set the mock flags for THIS shell session only (cleared when the
-# window closes). These three together make the cloud accept any
-# bearer, mock Anthropic calls, and mock Stripe calls so you don't
-# need any API keys.
+# Set the mock flags for THIS shell session only. Together they make
+# the cloud accept any bearer, mock Anthropic calls, and mock Stripe
+# calls so you don't need any API keys.
 $env:ANTHROPIC_MOCK = "true"
 $env:AUTH_MOCK      = "true"
 $env:STRIPE_MOCK    = "true"
@@ -113,9 +147,24 @@ bun run dev
 # Cloud listens on http://127.0.0.1:8080
 ```
 
-If you're in `cmd.exe`:
+Git Bash:
+
+```bash
+cd /d/Strong-Tower-Mods/packages/shared/api/companion
+
+export ANTHROPIC_MOCK=true
+export AUTH_MOCK=true
+export STRIPE_MOCK=true
+export JWT_SECRET="dev-jwt-secret-at-least-thirty-two-characters-long"
+
+bun run dev
+# Cloud listens on http://127.0.0.1:8080
+```
+
+cmd.exe:
 
 ```cmd
+cd /d D:\Strong-Tower-Mods\packages\shared\api\companion
 set ANTHROPIC_MOCK=true
 set AUTH_MOCK=true
 set STRIPE_MOCK=true
@@ -136,3 +185,6 @@ JWT through the mock SSO flow.
 - **AI ranking returns the deterministic fallback heuristic, not Claude** — the cloud is running with `ANTHROPIC_MOCK=true`. Clear `$env:ANTHROPIC_MOCK` and set `$env:ANTHROPIC_API_KEY` to your real Anthropic key.
 - **Cloud refuses to start with `FATAL: ANTHROPIC_API_KEY is not set and ANTHROPIC_MOCK is not "true"`** — the four `$env:` lines above are mandatory in dev mode; set them in the same PowerShell window before `bun run dev`. They don't persist across windows.
 - **PowerShell complains about `&` or `$env:`** — you're probably in `cmd.exe`. Either start `pwsh.exe` / `powershell.exe`, or use the `cmd` block above.
+- **Git Bash: `bun: command not found`** — Bun installed by winget puts itself on Windows `PATH`, which Git Bash inherits at startup. If Git Bash was open before you installed Bun, close it and reopen — the env doesn't refresh inside an existing window.
+- **Git Bash: `Set-Location: command not found`** — you copy-pasted the PowerShell block. Use the Git Bash block instead: `cd /d/path/...`.
+- **Git Bash: symlink step "fails silently"** — running the `mklink` line from a non-Admin Git Bash succeeds with a 0 exit code but produces a regular directory copy, not a symlink. Always run the symlink step from an Admin shell of any flavour, and verify with `dir "%APPDATA%\Vortex\plugins\strong-tower-mods-vortex"` — a real symlink shows `<SYMLINKD>` in the listing.

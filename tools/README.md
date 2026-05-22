@@ -9,9 +9,11 @@ Everything below assumes:
 
 * Windows 10 or 11, x64.
 * The repo is checked out at `D:\Strong-Tower-Mods\` — substitute your
-  actual path everywhere you see that prefix below.
-* PowerShell as your shell. `cmd.exe` equivalents are noted where the
-  syntax differs.
+  actual path everywhere you see that prefix below. In Git Bash the
+  same path is `/d/Strong-Tower-Mods/`.
+* PowerShell, `cmd.exe`, or **Git Bash** as your shell. Each
+  shell-specific command block below shows the PowerShell form, and
+  Git Bash / cmd equivalents follow where the syntax differs.
 
 The whole `tools/` directory is gitignored except for this README, so
 nothing you drop in here will accidentally land in a commit.
@@ -62,6 +64,12 @@ In PowerShell:
 
 ```powershell
 & "D:\Strong-Tower-Mods\tools\FaceFXWrapper.exe" --help
+```
+
+In Git Bash:
+
+```bash
+"/d/Strong-Tower-Mods/tools/FaceFXWrapper.exe" --help
 ```
 
 You should see a usage banner. If you get "data file missing" or the
@@ -128,8 +136,16 @@ other reason.
 
 ### Verify
 
+PowerShell:
+
 ```powershell
 & "D:\Strong-Tower-Mods\tools\xWMAEncode.exe"
+```
+
+Git Bash:
+
+```bash
+"/d/Strong-Tower-Mods/tools/xWMAEncode.exe"
 ```
 
 Running with no args prints a usage banner. The xWMAEncode build is
@@ -195,19 +211,34 @@ periodically.
 
 ### Clone
 
+PowerShell:
+
 ```powershell
 Set-Location D:\
+git clone https://github.com/ianpatt/f4se.git
+```
+
+Git Bash:
+
+```bash
+cd /d
 git clone https://github.com/ianpatt/f4se.git
 ```
 
 Confirms when complete:
 
 ```powershell
+# PowerShell
 Test-Path D:\f4se\src\f4se\f4se.sln
 ```
 
-If that returns `True`, you're set. The `f4se.sln` is what Visual
-Studio 2022 will open for the Phase C build.
+```bash
+# Git Bash
+[ -f /d/f4se/src/f4se/f4se.sln ] && echo OK || echo MISSING
+```
+
+If you see `True` (PowerShell) or `OK` (Git Bash), you're set. The
+`f4se.sln` is what Visual Studio 2022 will open for the Phase C build.
 
 ### Verify Visual Studio 2022 has the right workload
 
@@ -235,7 +266,14 @@ nicer to write. Phase C will work without it but the code is more
 verbose:
 
 ```powershell
+# PowerShell
 Set-Location D:\
+git clone https://github.com/Ryan-rsm-McKenzie/CommonLibF4.git
+```
+
+```bash
+# Git Bash
+cd /d
 git clone https://github.com/Ryan-rsm-McKenzie/CommonLibF4.git
 ```
 
@@ -341,6 +379,54 @@ set FACEFX_WRAPPER_PATH=D:\Strong-Tower-Mods\tools\FaceFXWrapper.exe
 ```
 
 Persistent: use `setx` (same command works in cmd or PowerShell).
+
+### Option E — Git Bash
+
+Session-only (lives until the Git Bash window closes):
+
+```bash
+export FACEFX_WRAPPER_PATH="D:\\Strong-Tower-Mods\\tools\\FaceFXWrapper.exe"
+export XWMAENCODE_PATH="D:\\Strong-Tower-Mods\\tools\\xWMAEncode.exe"
+export XEDIT_PATH="D:\\Tools\\FO4Edit\\FO4Edit.exe"
+export F4SE_SDK_PATH="D:\\f4se"
+```
+
+Double-backslashes are required inside double-quoted bash strings;
+forward slashes (`D:/Strong-Tower-Mods/tools/...`) also work and read
+more cleanly — Node, Python, and most Windows tools accept either.
+
+Verify:
+
+```bash
+env | grep -E '^(FACEFX|XWMA|XEDIT|F4SE)_'
+```
+
+Persistent (Git Bash sessions only — does NOT propagate to PowerShell,
+cmd, or VS Code unless they were launched FROM this Git Bash window):
+
+```bash
+cat >> ~/.bashrc <<'EOF'
+export FACEFX_WRAPPER_PATH="D:/Strong-Tower-Mods/tools/FaceFXWrapper.exe"
+export XWMAENCODE_PATH="D:/Strong-Tower-Mods/tools/xWMAEncode.exe"
+export XEDIT_PATH="D:/Tools/FO4Edit/FO4Edit.exe"
+export F4SE_SDK_PATH="D:/f4se"
+EOF
+source ~/.bashrc
+```
+
+For Windows-wide persistence (so the vars are visible to PowerShell,
+cmd, VS Code, and any future Git Bash window regardless of how it's
+launched), call `setx` from inside Git Bash with the `//c` escape:
+
+```bash
+cmd //c 'setx FACEFX_WRAPPER_PATH "D:\Strong-Tower-Mods\tools\FaceFXWrapper.exe"'
+cmd //c 'setx XWMAENCODE_PATH     "D:\Strong-Tower-Mods\tools\xWMAEncode.exe"'
+cmd //c 'setx XEDIT_PATH          "D:\Tools\FO4Edit\FO4Edit.exe"'
+cmd //c 'setx F4SE_SDK_PATH       "D:\f4se"'
+```
+
+`setx` changes only take effect in **new** shells — close and reopen
+your Git Bash window to pick them up.
 
 ---
 
