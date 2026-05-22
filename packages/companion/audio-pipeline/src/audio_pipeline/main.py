@@ -17,14 +17,14 @@ SIDECAR_PORT = int(os.environ.get('SIDECAR_PORT', '4999'))
 # sidecars ran simultaneously they would share that connection and could mix JWT identities
 # across turns — a silent auth-binding failure. The lockfile prevents this.
 #
-# POSIX (Linux/macOS — dev and packaging target):
-#   ~/.local/share/strong-tower-mods/sidecar.pid
-#
-# Windows (future PyInstaller packaging target):
-#   %LOCALAPPDATA%\strong-tower-mods\sidecar.pid
-#
-# The Windows path is not implemented here because the sidecar is not yet packaged for Windows;
-# add it when the PyInstaller frozen-exe packaging step lands.
+# Path on every supported platform is ``~/.local/share/strong-tower-mods/sidecar.pid``.
+# That resolves to ``C:\Users\<user>\.local\share\strong-tower-mods\sidecar.pid`` on
+# Windows — non-idiomatic for Windows (the canonical home would be ``%LOCALAPPDATA%``)
+# but it keeps the path identical across POSIX and Windows so debug instructions work
+# verbatim on both. The PyInstaller-frozen sidecar (Phase F1, dist-frozen/sidecar.exe)
+# uses the same logic; if a future revision wants the proper Windows convention,
+# branch on ``sys.platform`` here and update ``audio-pipeline/packaging/sidecar.spec``
+# along with it.
 
 def _lockfile_path() -> pathlib.Path:
     base = pathlib.Path.home() / '.local' / 'share' / 'strong-tower-mods'

@@ -19,13 +19,13 @@ with concrete status, what's blocked, and what unblocks it.
 | E3   | `shared/billing` — Stripe customer/sub + pre-auth   | shipped       | `5da8b15` — real Stripe gated on `STRIPE_SECRET_KEY` + price ids |
 | E4   | Cloud companion API auth + per-turn metering        | shipped       | `5da8b15` |
 | E5   | Cloud `/load-order/rank` + `/conflict/explain`      | shipped       | `23faf05` |
-| E6   | Cloud-endpoint integration tests + `buildApp`       | shipped       | `19997f2` (local) |
+| E6   | Cloud-endpoint integration tests + `buildApp`       | shipped       | `19997f2` |
 | F1   | PyInstaller frozen `sidecar.exe`                    | shipped       | `939cff7` |
 | F2   | MCM (Mod Configuration Menu)                        | blocked       | needs Creation Kit + MCM SDK (Neanka) |
 | G    | Free Nexus release (text-only marketing anchor)     | blocked       | depends on B + C + F2 producing a playable artifact |
 | 2    | Vortex extension scaffold                           | shipped       | `3fa3424` |
 | 2.8  | ESP binary parser + record-level conflict detection | shipped       | `df52e0e` |
-| CI   | GitHub Actions workflow                             | shipped       | `18e87c9` (local) |
+| CI   | GitHub Actions workflow                             | shipped       | `18e87c9` |
 
 Test totals across all six packages: **126 passing + 1 skipped, 0 failing**.
 

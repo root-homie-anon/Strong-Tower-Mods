@@ -6,22 +6,22 @@
  *   - Mock (``RANKER_MOCK=true``): applies a deterministic heuristic
  *     that mirrors the broad strokes Claude would land on — masters
  *     first, then frameworks, then content, then patches, then tweaks
- *     within each bucket alphabetically. The mock exists so the
- *     extension's downstream consumption (Vortex hook integration,
- *     UI panel rendering, persistence) can be tested end-to-end
- *     before the cloud /load-order/rank endpoint ships.
+ *     within each bucket alphabetically. Used in CI and for offline
+ *     dev so the extension's downstream consumption (Vortex hook
+ *     integration, UI panel rendering, persistence) can run without a
+ *     reachable cloud.
  *
- *   - Real (default): POSTs the mod list to ``${CLOUD_BASE_URL}/load-order/rank``
- *     on the companion API. The cloud holds the Anthropic key and the
- *     cached system prompt for load-order best practices. The
- *     extension never talks to Claude directly so user machines never
- *     hold our API key.
+ *   - Real (default): POSTs the mod list to ``${cloud.baseUrl}/load-order/rank``
+ *     on the companion API with a bearer JWT. The cloud holds the
+ *     Anthropic key and the cached system prompt for load-order best
+ *     practices; the extension never touches Claude directly so user
+ *     machines never hold our API key.
  *
- * The cloud endpoint is not yet implemented (tracked under Phase 2.x
- * follow-ups). Until then, the real path raises a clear error
- * directing the caller to set ``RANKER_MOCK=true`` — the same pattern
- * we use elsewhere to avoid silent hangs when an external dep is
- * missing.
+ * In real mode ``options.cloud`` is required — the function raises a
+ * clear ``NexusApiError`` if it's missing so a misconfigured caller
+ * hits a surfaced error instead of a silent hang. The Phase E5 cloud
+ * handler in ``packages/shared/api/companion/src/load-order.ts`` is
+ * the matching endpoint on the other side of this wire.
  */
 
 import { NexusApiError } from '../nexus-api/errors.js';

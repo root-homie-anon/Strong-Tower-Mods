@@ -9,6 +9,7 @@
 
 import { buildApp } from './app.js';
 import { validateAnthropicConfig } from './claude.js';
+import { validateAuthConfig } from './auth.js';
 
 const PORT = parseInt(process.env['CLOUD_PORT'] ?? '8080', 10);
 
@@ -16,7 +17,13 @@ const PORT = parseInt(process.env['CLOUD_PORT'] ?? '8080', 10);
 // in the process-exit code, not in a 502 to the first user that hits
 // /companion/turn. Tests that import buildApp() directly skip this
 // path by going through buildApp() instead of server.ts.
-if (!validateAnthropicConfig()) {
+//
+// Both checks are independent; we run them in sequence so the
+// operator sees both messages if both are wrong (rather than fixing
+// one only to discover the other on the next boot attempt).
+const anthropicOk = validateAnthropicConfig();
+const authOk = validateAuthConfig();
+if (!anthropicOk || !authOk) {
   process.exit(1);
 }
 

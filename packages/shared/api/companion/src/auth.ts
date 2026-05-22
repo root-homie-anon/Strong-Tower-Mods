@@ -45,6 +45,32 @@ function isMockAuth(): boolean {
   return process.env['AUTH_MOCK'] === 'true';
 }
 
+function isProduction(): boolean {
+  return process.env['NODE_ENV'] === 'production';
+}
+
+/**
+ * Validate auth-related configuration at process startup. Returns
+ * true if the process is allowed to continue, false if it should
+ * exit non-zero. The caller (server.ts) handles the exit so tests
+ * that import auth.ts directly are not killed mid-suite.
+ *
+ * The only invalid combination today is ``AUTH_MOCK=true`` plus
+ * ``NODE_ENV=production`` — a leaked mock flag in prod is a full
+ * auth bypass, so we crash on boot rather than serving requests
+ * with no real authentication. Mirrors the matching guards in
+ * claude.ts (Anthropic mock) and billing/stripe-client.ts (Stripe
+ * mock); previously we'd left this one to deploy config and that
+ * was the wrong call.
+ */
+export function validateAuthConfig(): boolean {
+  if (isMockAuth() && isProduction()) {
+    console.error('FATAL: AUTH_MOCK=true is forbidden when NODE_ENV=production. Exiting.');
+    return false;
+  }
+  return true;
+}
+
 /**
  * Verify a raw Authorization-header bearer token. Returns the auth
  * context on success, throws TurnAuthError on any failure. The error
@@ -58,12 +84,9 @@ export async function verifyTurnAuth(token: string | null): Promise<AuthContext>
 
   if (isMockAuth()) {
     // Mock mode trusts any non-empty bearer. The audio-pipeline test
-    // fixtures rely on this. It must never be enabled in production —
-    // shared/billing/src/stripe-client.ts has the equivalent guard for
-    // its mock; the same NODE_ENV check applies here in spirit, but
-    // we leave that enforcement to the deploy config rather than
-    // crashing the cloud on startup so a single misconfigured env var
-    // does not take the API down.
+    // fixtures rely on this. The production guard is enforced at
+    // startup by validateAuthConfig() — by the time we get here the
+    // dangerous combination has already been refused.
     return {
       mock: true,
       userId: '<mock>',
