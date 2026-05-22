@@ -51,7 +51,7 @@ async def turn_request(body: TurnRequest) -> dict[str, Any]:
     # Augment the client-supplied memoryRecall with MemPalace search results.
     # The query is the trigger + player input — the same string the cloud
     # will see in <trigger> and <player_input>, so recall surfaces memories
-    # relevant to what Sarah is actually about to respond to. Failures here
+    # relevant to what the companion is actually about to respond to. Failures here
     # are swallowed inside memory.recall() — the turn proceeds with whatever
     # memoryRecall the client provided.
     query = body.trigger if not body.playerInput else f'{body.trigger} {body.playerInput}'

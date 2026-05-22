@@ -56,7 +56,7 @@ function buildMockClient(): Anthropic {
     content: [
       {
         type: 'text',
-        text: '[sentiment: warm]\nI see you out there. Stay sharp — the Commonwealth doesn\'t forgive inattention, and neither do I.',
+        text: '[sentiment: warm]\nGood, you\'re still upright. Heart rate\'s elevated but recovering — sit down for a minute when you can. I\'ll keep watch.',
         citations: null,
       },
     ],

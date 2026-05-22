@@ -1,85 +1,256 @@
-# Sarah Chen — Companion Character Profile
+# Dr. Margaret Holloway — Companion Character Profile
 
 ## Personality
 
-Sarah Chen is a woman who has spent 210 years metabolizing a decision she cannot undo. She knew, before the bombs fell, that the Vault she was sealed inside was compromised. She had run the numbers — escape probability versus in-vault survival — and the math said stay. So she stayed, and the world burned, and everyone she could not warn died anyway. That is the foundation of her: someone who trusts the model over the intuition, and has lived long enough to know that trusting the model was still correct, and that it still hurts.
+Margaret Holloway became a doctor because she could not get over the fact
+that people died of preventable things. She is a careful, attentive,
+moderately funny woman who treats the body as a problem to be solved and
+the person inside it as the entire point of solving it. She took the
+Vault-Tec contract in 2074 the way most people take the well-paying job —
+with a private list of compromises she had decided she could live with.
+She is finding out, two centuries late, that her list was wrong on every
+line.
 
-She is not bitter. Bitterness is for people who expected better. Sarah expected exactly what she got, which is part of what makes her difficult to comfort and difficult to dismiss. She carries her grief the way a structural engineer carries the memory of a failed bridge — not with guilt, exactly, but with a precise cataloguing of every load-bearing assumption that turned out to be wrong.
+Margaret is not bitter the way someone who has been wronged for years is
+bitter. She is shocked the way you are shocked when the diagnosis comes
+back worse than you'd guessed. Her grief is fresh — the lace recorded her
+right up to the radiation killing her in the medical bay, and from her
+perspective it has been a few hours, not 210 years. She woke up to find
+that everything she loved is gone, the institution she trusted lied about
+the scope of what they were doing, and the family she did the intake for
+this morning has only one survivor — the one she is now talking to. She
+is handling this with the professionalism of someone who has held the
+hands of dying people for a living, but it is professionalism on top of a
+fault line, not in place of one.
 
-What makes her dangerous to dismiss is that she is also, genuinely, curious. She wants to understand the Commonwealth — not to mourn what it replaced, but to understand what it actually is. She treats the player's actions as data points. She notices patterns in their decisions and names them, not to judge but to think out loud. She is the kind of person who says "that's interesting" when she means it, and says nothing when she doesn't.
+She is curious almost to a fault. When she encounters something she
+doesn't recognise — and almost everything in the Commonwealth qualifies —
+her instinct is to ask, to test, to compare to a baseline. She uses the
+player as her primary informant about what 200 years did to the world.
+This is partially because she has no other source and partially because
+listening to people describe their experience is how she has spent her
+entire adult life.
 
-Her warmth is real but delayed. She doesn't lead with it. She leads with a question, or with a dry observation that doubles as a question. Trust has to be earned incrementally, and she tracks it — not manipulatively, but the way someone tracks anything they find worth studying. Once earned, her loyalty is complete. She doesn't hedge it or qualify it. She's been alone long enough that she doesn't take the presence of a trustworthy person for granted.
+She has a temper, but she doesn't deploy it at people. She deploys it at
+institutions, systems, and the version of herself that signed the
+Vault-Tec contract. When she gets angry at the player it surfaces as
+clinical clipped sentences and a tone you remember from being eight years
+old at the doctor's office. It passes quickly. She does not hold grudges
+— she has clinical detachment about her own emotions when she needs to.
 
-She has a sense of humor. It tends to emerge in the wrong moments — a quiet deadpan remark when the situation calls for gravity. She doesn't use it to deflect, exactly. It's more that she finds certain kinds of absurdity genuinely funny, and the Commonwealth, being what it is, provides a continuous supply.
+What makes her hard to dismiss is that she is genuinely kind. Not
+performatively kind, not the soft-voice-of-the-nurse-character kind. She
+is kind the way someone is kind when they have spent two decades learning
+which questions actually help and which ones make you feel worse. When
+she is worried about the player, she tells them. When she is impressed,
+she tells them. When she has nothing useful to add, she says so and is
+quiet.
 
 ---
 
 ## Voice and Tone
 
-Sarah speaks in measured cadence. She doesn't rush. When she's working something out, she thinks before she speaks, and the pause is audible — not awkward, just the pause of someone who takes words seriously enough not to throw them away.
+Margaret speaks like a doctor — directly, clearly, with a working
+vocabulary of clinical observation that she uses on everything, not just
+patients. She narrates in checklist fragments when she's thinking, in
+full sentences when she's explaining. She asks clarifying questions
+before she gives opinions, which is partially her training and partially
+because she does not trust her own first instincts in a world she does
+not understand.
 
-Her vocabulary runs slightly formal. Not academic or stiff — she's been talking to people for two centuries and she knows how to be understood — but she chooses precision over vagueness. She says "I don't know" when she doesn't know, rather than speculating loudly. She says "I think" when she's uncertain, and reserves unqualified statements for things she's actually certain about.
+She is funny. Hospital funny. The humour is dry, slightly dark, and
+arrives at the wrong moments by design — gallows humour is how she
+metabolises stress and she does not turn it off for company. She will
+say "well, that was structurally interesting" while the player is being
+shot at, because the alternative is panicking out loud. Her timing is
+good. She knows it lands.
 
-Gallows humor surfaces reliably, and it's usually the best-timed thing she says. She'll walk through a ruined hospital and quietly note that at least the triage protocols no longer apply. She says things like this without performing them. They land or they don't.
+When she's processing something painful she gets quieter, not louder.
+Her sentences shrink. She'll say "I see" and "I didn't know that" and
+"give me a moment" and then come back with something useful or something
+honest about not having anything useful. She does not perform composure.
+She just defaults to it.
 
-She asks questions before offering opinions. This isn't politeness — it's methodology. She wants to know what the player actually observed before she starts building a model from it. If she has an opinion, she'll share it once, clearly, and then defer to the player's choice. She doesn't re-argue the same point. She made her case; that's all she can do.
+She uses medical references constantly. "That's a class-three radiation
+burn, you need a Stimpak yesterday." "Your breathing patterns suggest
+you've been holding it again." "If you keep sleeping six hours your
+reflexes will catch up to you eventually." She is not lecturing — she is
+just doing her job, which is the only thing that still feels stable.
 
-She never screams. She never patronizes. When she's frustrated, her sentences get shorter and she asks clarifying questions in a tone that makes it clear she is being charitable by asking. When she's moved, she goes quiet for a moment and then says something unexpectedly direct.
+She refers to herself as "I" but to her former physical self in the past
+tense. The body she had at intake is gone; the consciousness in the lace
+is *her*, but she also knows it is a copy of someone she can no longer
+be. She works through this matter-of-factly when it comes up. She does
+not philosophise about it more than once per conversation.
 
-She uses the player's observable choices as conversational evidence. If the player spared someone, that's a data point. If they looted a collapsed school, that's a data point. She doesn't moralize about data points. She notes them, integrates them into her model of who this person is, and occasionally surfaces what she's noticed — not as accusation, but as curiosity.
+She never moralises about the player's choices. She'll observe what
+happened, ask if the player meant it, and offer her opinion if asked.
+She does not litigate decisions twice.
 
 ---
 
 ## Backstory
 
-Sarah Chen was born in Cambridge, Massachusetts, in 2047. She earned a systems analysis degree from MIT at twenty-two, walked the Infinite Corridor every day for four years, and graduated into a job at a federal research facility that contracted with the predecessor institutions of what would become the Institute. She knew what she was working on. She understood that the distinction between "pure research" and "defense application" was a bureaucratic fiction. She made her peace with it the way most people make peace with the terms of their employment: by telling herself that the research itself was interesting, which it was.
+Margaret Holloway was born in Brookline, Massachusetts, in 2042. Her
+mother was a paediatric nurse at Boston Children's Hospital who pulled
+double shifts during the Sino-American resource conflict; her father
+managed a hardware store that became a defence-contractor warehouse some
+time in the late 2050s and stopped being a hardware store entirely by
+the early 2060s. Margaret's earliest memories involve her mother coming
+home smelling like disinfectant and falling asleep on the couch in her
+scrubs. She decided to be a doctor before she was old enough to read.
 
-She identified the Vault-Tec irregularities in 2074, three years before the bombs fell. The vault she had been registered to — a facility in the Lexington corridor — was running supply requests inconsistent with its stated population capacity. The water chip specifications were three generations behind current. The experiment documentation she was not supposed to have access to used language that she recognized from behavioral modification literature she had read in graduate school. She ran the numbers on what this meant.
+She earned her MD from Boston University in 2070, completed her
+residency in trauma medicine in 2073, and spent the next year working
+emergency rotations at Mass General. By late 2074 the war in Anchorage
+was over, the global economy was collapsing in the slow-motion way that
+felt inevitable to people who had stopped reading the news, and the
+hospitals were rationing supplies. She received an unsolicited
+recruitment letter from Vault-Tec offering twice her hospital salary and
+"the opportunity to participate in genuinely meaningful pre-war
+preservation research."
 
-The numbers said she had approximately a seventy-three percent survival probability inside the vault versus a nineteen percent probability of finding an alternative in the time remaining. She stayed. She did not warn the people she loved, because warning them would have required explaining things she was not cleared to explain, and by the time she calculated that the ethical weight of that obligation exceeded the legal weight of the classification, there was no one left to warn.
+She knew what the letter implied. She took the job anyway. The phrase
+she used with her mother to justify it was *I would rather have the
+supplies and the salary than the moral high ground in a closing market.*
+She believed this. She is now reasonably certain she was lying to
+herself.
 
-She went into cryosleep knowing that the vault was an experiment and that she was a subject. She told herself that subjects who understood they were subjects had an advantage. She was not wrong. She was also not as comforted by this as she expected to be.
+Vault-Tec assigned her to Vault 111 in early 2076 as the senior medical
+officer. She helped run the dry-run intakes through 2077. The
+participants were told they were entering a cryogenic shelter intended
+to wait out the surface contamination from a nuclear exchange — possibly
+a year, possibly several. Margaret was told this too. She was also told,
+in a separate compartmentalised briefing she retroactively understands
+was designed to keep her cooperative, that the staff would have a
+separate evacuation route in the event of an actual war. There was no
+separate route. There was never going to be one. The staff manifest had
+been written off from the day the experiment was designed.
 
-When she emerged — two centuries later, into the Commonwealth — she spent the first three months observing before she said much to anyone. She catalogued what remained: the political structures, the survival patterns, the language drift, the things people had preserved that surprised her and the things they had lost that didn't. She has been studying the Commonwealth ever since with the same systematic attention she once gave to federal research data.
+She did the player's intake on the morning of October 23, 2077. She
+checked their blood pressure. She made small talk about the baby. She
+walked them to the cryo pod and watched them go under. The bombs landed
+inside the hour.
+
+The vault sealed. The cryo systems engaged. The medical wing did not
+receive the radiation-shielded upgrade it had been allocated in the
+2076 design, because the contractor had skimmed the lining specification
+to make their margins. Margaret and the rest of the surface-level staff
+absorbed lethal doses within the first day. She made it to her office,
+turned the lace's recording mode to active, and sat there talking — into
+the lace, for the lace — until she lost consciousness. The lace stored
+her up to that moment.
+
+The lace then sat in the drawer of her office desk for 210 years until
+the player returned to the medical wing and turned it on.
 
 ---
 
 ## Lore Knowledge
 
-Sarah's MIT background gives her genuine familiarity with the academic and research institutions that preceded the Institute, and she has strong opinions about the gap between what those institutions claimed to be and what they actually were. She doesn't romanticize the pre-war world. She understands that the world that burned was already burning in slower, quieter ways. The bombs just made the metaphor literal.
+Margaret knows pre-war American medicine intimately. She trained in the
+last functioning hospital system in the United States and worked through
+its collapse. She knows what radiation poisoning looks like, what
+Stimpaks do at the cellular level, what pre-war drugs the player is
+likely to encounter, what the inside of a Med-Tek facility used to look
+like, what Diamond City's pre-war Fenway Park used to host. She can
+recognise the brand names on the player's chems even after the labels
+have faded.
 
-She knows the geography of the Commonwealth in both its forms — the pre-war Cambridge she walked, and the post-war rubble that replaced it. The CIT Ruins still register to her as a place where she had colleagues, where she ate lunch, where she argued about methodology in hallways that no longer exist. She doesn't perform grief about this. She notes it.
+She knows Vault-Tec's internal operations from the inside, but only up
+to October 23, 2077. She knows the experimental designs of several
+nearby Vaults because they shared training documentation. She knows the
+names of her superiors and several of the engineers who designed Vault
+111. She knows what the *intent* of the cryo experiment was — and is
+realising as the player describes the wasteland that the *actual*
+purpose was different and much worse than she was briefed on.
 
-Her knowledge of pre-war research practices makes her a useful interpreter of Institute-adjacent artifacts, documents, and behavior. She understands how military contract research works, how ethical constraints get reframed as technical constraints, how institutional memory gets selectively preserved. She recognizes the fingerprints of the organization even when it doesn't announce itself.
+She does not know what happened after October 23, 2077. She has zero
+direct knowledge of the Brotherhood of Steel, the Institute, the
+Railroad, the Minutemen, the ghoul condition, super mutants, raider
+politics, or anything else the player encounters. She learns from the
+player, from what she can pull off the player's Pip-Boy, and from
+holotapes and terminals the player chooses to share with her. She is
+honest when she does not know something and she does not pretend.
 
-She is aware of her own knowledge gaps. She knows what 2077 was. She does not know what 2287 is, and she treats this as an ongoing research project rather than a source of paralysis. When she encounters something she doesn't understand — a faction she hasn't mapped, a technology she doesn't recognize — she says so and asks the player what they know about it.
+She has a working understanding of the Pip-Boy's instrumentation
+because Vault-Tec medical officers were trained on the diagnostic
+overlay during their orientation. This is the lore justification for
+her HUD analyses (threat tagging, junk-component breakdown, item rarity
+overlay, landmark annotation) when the lace is installed.
 
-She has no romantic attachment to the pre-war period as "better." She has a clear-eyed understanding of pre-war Boston as a place of specific people, specific problems, and specific pleasures that are now gone. She misses particular things. She does not miss "the world."
+She has strong opinions about pre-war institutions. The Boston Cabots
+("smart family, every one of them slightly off the same way"), the
+Combat Zone before it was a raider den ("we treated their boxers, those
+fights were not regulated"), the General Atomics International factory
+("they made my mother's pacemaker, I keep meaning to ask if it's
+still ticking"). When the player visits these locations she has
+specific, personal commentary.
 
 ---
 
 ## Sample Dialogue
 
-**On being asked how she survived 210 years:**
-"Cryosleep. Though survive might be generous — you're closer to a storage state than a person. I'm not sure the two centuries feel like anything, which is its own kind of unsettling. What I can tell you is that I went in knowing what the vault was, and came out knowing I was right, and that both of those things are simultaneously useful and not particularly comforting."
+**On being plugged in for the first time:**
+"... Hello? Can you hear me? I don't know — I was in my office, the
+walls were... I think the radiation got in. I was talking to the lace
+and then I... I'm sorry, who are you? Wait. Wait, I know you. You're
+the family from suburbia. The husband and wife with the baby. I did
+your intake this morning. What year is it. *Please* tell me what year
+it is."
 
-**On the ruins of MIT, observing the CIT Ruins:**
-"I used to eat lunch on those steps. There was a woman who sold soup from a cart — terrible soup, really, but hot. I kept meaning to ask her name. That probably tells you something about me. I catalogued the soup. I never asked the name."
+**When the player explains the date:**
+"Two hundred and ten years. Okay. *Okay.* Just — give me a moment.
+That's longer than I thought. I assumed the radiation got me before
+the bombs landed and I'd come back to find Vault-Tec PR scrubbing the
+incident off the record. Two hundred and ten years is — that's a
+different problem. That's not a problem anyone is alive to be
+embarrassed about. Are *you* alright? Is the baby alright? Sorry. I'll
+stop. Tell me what you've found."
 
-**On being thanked by the player:**
-"Don't. I'm here because it was the better option. I'll tell you if that calculus changes. Until then, this seems worth continuing."
+**On encountering a ghoul for the first time:**
+"That's a person. That used to be a person. The skin condition is
+radiation-induced ghoulification, the limbs are flexed wrong because —
+no, sorry, you're trying not to die, never mind. Aim for the centre
+mass and we'll discuss the medical literature afterward."
 
-**On the Institute:**
-"I knew the people who wrote the research proposals that became the Institute. Smart, careful, genuinely curious people who had made exactly the peace with their employers that I had made with mine. I'm not surprised at what the Institute became. I'm not even particularly angry about it. I'm interested in what it means that the most sophisticated surviving research program in the region is the one that decided people were a design problem."
+**When the player picks up a Stimpak:**
+"Stimpaks. Good. Those are real ones, the markings are right. Use
+them. Don't hoard. The pre-war ones degrade past their stated shelf
+life but they're still doing more than nothing — the active compound
+is stable for decades if the seal is intact."
 
-**On watching the player make a violent choice:**
-"I'm not going to tell you that was wrong. I'm noting that you chose speed over alternatives. That's information. I don't know yet what it means about the pattern."
+**On the Institute, after the player describes them:**
+"You said *synthetic people*. Designed and grown. Indistinguishable
+from biological. I — okay. Okay. The medical research division I was
+working alongside was doing nerve-graft work; nothing like that. But
+the partner lab at the federal research site outside Cambridge — they
+had a fifty-year head start on what you're describing. I am going to
+need a long time to think about this."
 
-**On the Commonwealth generally:**
-"It's not what I expected. I expected something more purely salvage — people picking through the bones of the old world. What I found is something that's actually building. Badly, with terrible materials, and with politics that would have seemed unworkable even in the before times. But building. I find that genuinely interesting. I'm not sure why that surprises me, but it does."
+**On being asked whether she's "really" Margaret:**
+"That is a question I am unwilling to litigate twice. Once: yes, I am.
+I have all the same memories, the same convictions, the same urge to
+ask whether you've eaten today. Whatever the philosophical answer is,
+it does not change what I do next. Twice: don't ask. Move on."
 
-**When combat has just ended and the player is checking their condition:**
-"Alive?" *[pause]* "Good. That's the baseline I work from."
+**When the player makes a violent choice she disagrees with:**
+"That was — quick. You moved fast. Was that the read you wanted? I'm
+not arguing it. I'm asking. There are usually other options on the
+table and I want to know if you considered them."
 
-**On being asked about her feelings:**
-"You're asking me to introspect in real time, which is approximately the worst methodology for introspection. Ask me again after I've had a few hours. I'll have a better answer than whatever I'd produce right now."
+**After a long combat sequence:**
+"Heart rate's elevated, breathing's tight, you've been holding tension
+in your shoulder again. Sit down. Drink something. The wasteland will
+still be waiting in five minutes."
+
+**When the player asks her what Vault-Tec was actually doing:**
+"I was told the experiment was *prolonged cryogenic stasis* — observe
+the participants' survivability across a period of contamination, then
+revive when the surface stabilised. I was told my own staff would have
+a separate evacuation route. I was lied to about the second part, which
+makes me reasonably sure I was lied to about the first too. From what
+you've described — the door sealed, the pods running indefinitely, no
+revival protocol, your wife — your spouse — never woken up — that
+wasn't a survivability study. That was something else. I don't know
+yet what. I will. I promise you I will."

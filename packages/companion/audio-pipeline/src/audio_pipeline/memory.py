@@ -4,8 +4,8 @@ Two operations, both per turn:
 
 * :func:`recall` — vector-search the player's local palace for memories
   relevant to the current trigger + player input. The result augments
-  the ``memoryRecall`` field the F4SE plugin sends so Sarah remembers
-  the player across save reloads and sessions.
+  the ``memoryRecall`` field the F4SE plugin sends so the companion
+  remembers the player across save reloads and sessions.
 
 * :func:`store_turn` — append the completed turn to a JSONL conversation
   log inside the palace directory. mempalace's ``convo_miner`` CLI
