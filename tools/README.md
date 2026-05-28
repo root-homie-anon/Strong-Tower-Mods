@@ -24,12 +24,18 @@ nothing you drop in here will accidentally land in a commit.
 
 | Binary | Env var | Phase that needs it |
 |---|---|---|
-| `FaceFXWrapper.exe` | `FACEFX_WRAPPER_PATH` | B — lip-sync `.lip` file generation |
-| `xWMAEncode.exe` | `XWMAENCODE_PATH` | B — WAV → XWM conversion (FUZ packing) |
+| `FaceFXWrapper.exe` | `FACEFX_WRAPPER_PATH` | **B (deferred post-v1)** — lip-sync `.lip` file generation. Not needed under the Cortana model. |
+| `xWMAEncode.exe` | `XWMAENCODE_PATH` | **B (deferred post-v1)** — WAV → XWM conversion. Not needed under the Cortana model. |
 | `FO4Edit.exe` | `XEDIT_PATH` | 3 — mod-creator ESP record analysis |
-| F4SE SDK (cloned dir) | `F4SE_SDK_PATH` | C — companion C++ plugin build |
+| F4SE SDK (release bundle or clone) | `F4SE_SDK_PATH` | C — companion C++ plugin build |
 | Creation Kit (Steam) | — (path discovered automatically) | F2 — MCM authoring |
 | MCM SDK (Neanka) | — (lives inside `<FO4>\Data\Source\Scripts\MCM\`) | F2 — Papyrus headers |
+
+**Margaret + Cortana note:** Phase B is deferred post-v1 because the
+Mnemosyne Lace plays HUD audio with no NPC body to lip-sync. The two
+"deferred" rows are kept here for v2-and-beyond reference; they are
+not on the critical path for the playable v1 companion. See
+`../PHASES.md` "Companion design" for the full rationale.
 
 ---
 
@@ -174,71 +180,89 @@ analysis on plugins our extension can't decode statically.
 ### Place
 
 xEdit is a multi-file install — it has scripts, INI files, and the
-`.exe`. Don't drop just the .exe into `tools/`; put the whole
-extracted folder somewhere and point the env var at the `.exe`:
+`.exe`. Extract the whole folder somewhere and point the env var at
+the `.exe`:
 
 ```
-D:\Tools\FO4Edit\
+D:\Strong-Tower-Mods\tools\FO4Edit 4.1.5f\
 ├── FO4Edit.exe          ← XEDIT_PATH points here
 ├── FO4Edit.ini
 ├── Edit Scripts\
 └── ... (other support files)
 ```
 
-Recommended location: `D:\Tools\FO4Edit\` (outside this repo). Don't
-put it in the repo's `tools/` — xEdit writes back to its own dir
-(logs, INI updates) and we don't want those churning our gitignore.
+xEdit writes runtime state back into its own dir (logs, INI updates,
+backups). The `tools/*` gitignore rule covers this so the noise stays
+out of git. Either `tools/FO4Edit <ver>/` or an out-of-repo location
+like `D:\Tools\FO4Edit\` works — pick by preference.
+
+### First-launch prerequisite
+
+FO4Edit requires `Fallout4.ini` to exist before it can run. The file
+is created the first time you launch Fallout 4 (Steam → Play →
+Options → OK is enough; you don't have to actually start a new game).
+If your Documents folder is OneDrive-redirected, the .ini lands at
+`C:\Users\<user>\OneDrive\Documents\My Games\Fallout4\Fallout4.ini` —
+FO4Edit handles the redirection automatically, but other tools may
+not, worth flagging.
 
 ### Verify
 
-Run `FO4Edit.exe` once interactively first — it asks you to confirm
-the game path on first launch. After that it's fully scriptable.
+Run `FO4Edit.exe` once interactively first — it confirms the game
+path. After that it's fully scriptable.
 
 ### Set the env var
 
 ```
-XEDIT_PATH=D:\Tools\FO4Edit\FO4Edit.exe
+XEDIT_PATH=D:\Strong-Tower-Mods\tools\FO4Edit 4.1.5f\FO4Edit.exe
 ```
+
+Quote the path in your shell — the version-numbered directory name
+contains a space.
 
 ---
 
 ## 4. F4SE SDK — Phase C
 
-This is the open-source SDK we link the C++ companion plugin against.
-Do **not** put it in `tools/` — it's a multi-thousand-file source
-tree that's expected to live as a sibling directory you `git pull`
-periodically.
+The C++ source we link the companion plugin against. **Two ways to
+get it** — both work, pick whichever you prefer.
 
-### Clone
+### Option A — official release bundle (recommended, no git needed)
 
-PowerShell:
+Download the latest F4SE release from <https://f4se.silverlock.org/>.
+The official .7z contains BOTH the runtime DLLs (for actually running
+F4 with F4SE-enabled mods) AND the full source SDK in the same
+archive. Extract to `tools/` so it lives under your repo:
 
-```powershell
-Set-Location D:\
-git clone https://github.com/ianpatt/f4se.git
+```
+D:\Strong-Tower-Mods\tools\f4se_0_06_23\
+├── f4se_loader.exe              ← runtime (copy into FO4 Data\ to play)
+├── f4se_1_10_163.dll            ← runtime
+├── f4se_steam_loader.dll        ← runtime
+├── Data\                         ← runtime
+└── src\
+    ├── common\common\common.sln
+    └── f4se\f4se.sln             ← SDK — Visual Studio opens this for Phase C
 ```
 
-Git Bash:
+`F4SE_SDK_PATH` then points at the bundle root (the dir that contains
+`src/`), e.g. `D:\Strong-Tower-Mods\tools\f4se_0_06_23`.
+
+### Option B — git clone the source repo
+
+Source-only, no runtime. Lives outside `tools/` as a sibling dir you
+`git pull` periodically:
 
 ```bash
 cd /d
 git clone https://github.com/ianpatt/f4se.git
-```
-
-Confirms when complete:
-
-```powershell
-# PowerShell
-Test-Path D:\f4se\src\f4se\f4se.sln
-```
-
-```bash
-# Git Bash
 [ -f /d/f4se/src/f4se/f4se.sln ] && echo OK || echo MISSING
 ```
 
-If you see `True` (PowerShell) or `OK` (Git Bash), you're set. The
-`f4se.sln` is what Visual Studio 2022 will open for the Phase C build.
+`F4SE_SDK_PATH=D:\f4se` in this case.
+
+Either way, the file Visual Studio opens for Phase C builds is
+`<F4SE_SDK_PATH>/src/f4se/f4se.sln`.
 
 ### Verify Visual Studio 2022 has the right workload
 
